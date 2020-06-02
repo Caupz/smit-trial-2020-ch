@@ -28,6 +28,10 @@ public class BookLendingsDAOWrapper {
         return item;
     }
 
+    public Integer getCountOfLendedBook(Integer bookId) {
+        return dao.getCountOfLendedBook(bookId);
+    }
+
     public BookLender update(BookLender model){
         BookLender item = new BookLender();
         BeanUtils.copyProperties(model, item);

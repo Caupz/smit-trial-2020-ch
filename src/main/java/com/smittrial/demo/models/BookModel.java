@@ -1,6 +1,9 @@
 package com.smittrial.demo.models;
 
 import com.smittrial.demo.enums.BookLendingDeadline;
+import com.smittrial.demo.service.BookLendingsServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -53,7 +56,7 @@ public class BookModel {
 
     public String toString() {
         return String.format("Name: %s Author: %s Quantity: %d Lending time: %d week(s) Location: %s",
-                getName(), getAuthor(), getQuantityAvailable(), getLendingTime(), getLocation());
+                getName(), getAuthor(), getQuantity(), getLendingTime(), getLocation());
     }
 
     public void setId(int val) {
@@ -99,8 +102,8 @@ public class BookModel {
         return quantity;
     }
 
-    public int getQuantityAvailable() {
-        return quantity; // TODO
+    public void SetQuantityToAvailable(int lendedOutQuantity) {
+        quantity -= lendedOutQuantity;
     }
 
     public Date getDate3MonthsBefore() {

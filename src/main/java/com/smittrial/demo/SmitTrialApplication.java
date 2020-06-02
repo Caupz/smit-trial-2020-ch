@@ -43,6 +43,7 @@ public class SmitTrialApplication {
 		List<String> booksResponse = new ArrayList<String>();
 
 		for (BookModel book : books) {
+			book.SetQuantityToAvailable(bookLendingServiceImpl.getCountOfLendedBook(book.getId()));
 			booksResponse.add(book.toString());
 		}
 

@@ -36,4 +36,7 @@ public class BookLendingsServiceImpl implements LateBookLendingsService {
     public Integer addBookLender(BookLender item){
         return DAOWrapper.save(item);
     }
+    public Integer getCountOfLendedBook(Integer bookId){
+        return DAOWrapper.getCountOfLendedBook(bookId);
+    }
 }
