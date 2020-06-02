@@ -2,8 +2,10 @@ package com.smittrial.demo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.smittrial.demo.models.BookModel;
+import com.smittrial.demo.models.BookOvertimeResult;
 import com.smittrial.demo.models.UserModel;
 import com.smittrial.demo.service.BookServiceImpl;
+import com.smittrial.demo.service.LateBookLendingsServiceImpl;
 import com.smittrial.demo.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.smittrial.demo.utility.JSONUtils;
@@ -29,10 +32,19 @@ public class SmitTrialApplication {
 		SpringApplication.run(SmitTrialApplication.class, args);
 	}
 
+	/*@GetMapping(value="test/getTest", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<BookModel>> getTest() {
+		List<BookModel> listProduct = new ArrayList<BookModel>();
+		listProduct.add(new BookModel(1));
+		return new ResponseEntity<List<BookModel>>(listProduct, HttpStatus.OK);
+	}*/
+
 	@Autowired
 	private BookServiceImpl bookServiceImpl;
 	@Autowired
 	private UserServiceImpl userServiceImpl;
+	@Autowired
+	private LateBookLendingsServiceImpl lateBookLendingServiceImpl;
 
 	@GetMapping(value="getLibrarySummary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<String>> getLibrarySummary() {
@@ -79,5 +91,16 @@ public class SmitTrialApplication {
 		newUser.setId(userServiceImpl.add(newUser));
 
 		return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson(newUser.toString()), HttpStatus.CREATED);
+	}
+	@GetMapping(value="getLateLenders", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<BookOvertimeResult>> getLateLenders() throws JsonProcessingException, SQLException {
+		UserModel user = new UserModel(); // TODO get user from somewhere
+		List<BookOvertimeResult> bookOverTimes = new ArrayList<>(lateBookLendingServiceImpl.getAllLateBookLenders());
+
+		if(!user.hasRole("library-worker")) {
+			return new ResponseEntity<List<BookOvertimeResult>>(bookOverTimes, HttpStatus.FORBIDDEN);
+		}
+
+		return new ResponseEntity<List<BookOvertimeResult>>(bookOverTimes, HttpStatus.OK);
 	}
 }

@@ -7,4 +7,8 @@ public class BookLender {
     private int userId;
     private int bookId;
     private Date deadline;
+
+    public int getId() {
+        return id;
+    }
 }
