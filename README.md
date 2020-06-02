@@ -1,6 +1,7 @@
 # SMIT Sample Work 2020
 
-App of library's RestAPI which helps to manage books and it's lenders.
+- App of library's RestAPI which helps to manage books and it's lenders.
+- Database with some sample data is in db_dump.sql file. I used MariaDB for Database Server.
 
 # Install instructions
 1. Git clone
