@@ -16,4 +16,9 @@ public class UserModel {
     public String getEmail() {
         return email;
     }
+
+    public boolean hasRole(String roleName) {
+        // TODO
+        return true;
+    }
 }
