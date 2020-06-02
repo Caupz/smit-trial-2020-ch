@@ -4,8 +4,8 @@ App of library's RestAPI which helps to manage books and it's lenders.
 
 # Install instructions
 1. Git clone
-2. Build
-3. Install Gradle if you haven't got it already
+2. Install Gradle if you haven't got it already
+3. Build
 4. After running is finished its process go to http://localhost:8080
 
 # Actions
