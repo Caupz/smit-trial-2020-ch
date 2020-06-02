@@ -21,4 +21,6 @@ CAPS LOCKED texts are meant to be replaced by values you want to provide for the
 
 # Closing words
 
-I didn't have much experience with Java before. Only had experience when a friend asked me to fix some minor bugs or 1 course in school which only covered the basics (vars, classes, objects, functions, etc). I know the naming convention is kind of clumsy, but I'm not familiar with Java's elements. Lots of things could've been done better if would've had more time because most of it went for studying the exams.
+I didn't have much experience with Java before. Only had experience when a friend asked me to fix some minor bugs or 1 course in school which only covered the basics (vars, classes, objects, functions, etc). I know the naming convention is kind of clumsy, but I'm not familiar with Java's elements. Lots of things could've been done better if would've had more time because most of it went for studying the exams.  
+  
+Everything I couldn't do is documented in issues.
