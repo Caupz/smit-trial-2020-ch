@@ -28,12 +28,18 @@ public class BookLendingsDAOWrapper {
         return item;
     }
 
-    public BookLender update(BookLender product){
+    public BookLender update(BookLender model){
         BookLender item = new BookLender();
-        BeanUtils.copyProperties(product, item);
-        BookLender en=  dao.save(item);
-        BookLender product2 = new BookLender();
-        BeanUtils.copyProperties(en,product2);
-        return product2;
+        BeanUtils.copyProperties(model, item);
+        BookLender en = dao.save(item);
+        BookLender item2 = new BookLender();
+        BeanUtils.copyProperties(en,item2);
+        return item2;
+    }
+    public Integer save(BookLender model){
+        BookLender item = new BookLender();
+        BeanUtils.copyProperties(model, item);
+        BookLender en = dao.save(item);
+        return en.getId();
     }
 }

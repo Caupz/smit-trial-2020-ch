@@ -48,6 +48,7 @@ public class SmitTrialApplication {
 
 		return new ResponseEntity<List<String>>(booksResponse, HttpStatus.OK);
 	}
+
 	@GetMapping(value="searchBookByName/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> searchBookByName(@PathVariable("name") String name) throws JsonProcessingException {
 		UserModel user = new UserModel(); // TODO get user from somewhere
@@ -64,6 +65,7 @@ public class SmitTrialApplication {
 
 		return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson(book.toString()), HttpStatus.OK);
 	}
+
 	@GetMapping(value="addUser/{email}/{password}/{firstname}/{lastname}/{ssn}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> addUser(
 			@PathVariable("email") String email,
@@ -83,6 +85,7 @@ public class SmitTrialApplication {
 
 		return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson(newUser.toString()), HttpStatus.CREATED);
 	}
+
 	@GetMapping(value="getLateLenders", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<BookOvertimeResult>> getLateLenders() throws JsonProcessingException, SQLException {
 		UserModel user = new UserModel(); // TODO get user from somewhere
@@ -95,6 +98,7 @@ public class SmitTrialApplication {
 		bookOverTimes = new ArrayList<>(bookLendingServiceImpl.getAllLateBookLenders());
 		return new ResponseEntity<List<BookOvertimeResult>>(bookOverTimes, HttpStatus.OK);
 	}
+
 	@GetMapping(value="searchBookLender/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<SearchedBookLender>> searchBookLender(@PathVariable("name") String name) throws JsonProcessingException, SQLException {
 		UserModel user = new UserModel(); // TODO get user from somewhere
@@ -107,6 +111,7 @@ public class SmitTrialApplication {
 		bookLenders = new ArrayList<SearchedBookLender>(bookLendingServiceImpl.searchBookLender(name));
 		return new ResponseEntity<List<SearchedBookLender>>(bookLenders, HttpStatus.OK);
 	}
+
 	@GetMapping(value="receiveBook/{bookId}/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> receiveBook(
 			@PathVariable("bookId") int bookId,
@@ -121,6 +126,33 @@ public class SmitTrialApplication {
 		BookLender bookLender = bookLendingServiceImpl.findByBookAndUserId(bookId, userId);
 		bookLender.setReturned(1);
 		bookLendingServiceImpl.update(bookLender);
+
+		return new ResponseEntity<>(true, HttpStatus.OK);
+	}
+
+	@GetMapping(value="lendBook/{bookId}/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> lendBook(
+			@PathVariable("bookId") int bookId,
+			@PathVariable("userId") int userId
+	) throws JsonProcessingException, SQLException {
+		UserModel user = new UserModel(); // TODO get user from somewhere
+
+		if(!user.hasRole("library-worker-tender")) {
+			return new ResponseEntity<Boolean>(false, HttpStatus.FORBIDDEN);
+		}
+
+		BookModel book = bookServiceImpl.getBookById(bookId);
+
+		if(book == null) {
+			return new ResponseEntity<Boolean>(false, HttpStatus.NOT_FOUND);
+		}
+
+		BookLender bookLender = new BookLender();
+		bookLender.setBookId(bookId);
+		bookLender.setUserId(userId);
+		bookLender.setDeadline(book.getDeadlineDate());
+		bookLender.setReturned(0);
+		bookLendingServiceImpl.addBookLender(bookLender);
 
 		return new ResponseEntity<>(true, HttpStatus.OK);
 	}

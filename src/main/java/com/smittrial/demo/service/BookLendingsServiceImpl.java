@@ -5,6 +5,7 @@ import java.util.Collection;
 import com.smittrial.demo.dao.LateBookLendingsDAOWrapper;
 import com.smittrial.demo.dao.SearchBookLendingsDAOWrapper;
 import com.smittrial.demo.models.BookLender;
+import com.smittrial.demo.models.BookModel;
 import com.smittrial.demo.models.BookOvertimeResult;
 import com.smittrial.demo.models.SearchedBookLender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,5 +32,8 @@ public class BookLendingsServiceImpl implements LateBookLendingsService {
     }
     public void update(BookLender lender) {
         DAOWrapper.update(lender);
+    }
+    public Integer addBookLender(BookLender item){
+        return DAOWrapper.save(item);
     }
 }

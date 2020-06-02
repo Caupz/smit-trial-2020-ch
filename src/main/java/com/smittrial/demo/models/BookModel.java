@@ -21,8 +21,8 @@ public class BookModel {
     private String location;
     private Date published;
     private int quantity;
-    private static String SHORT_LENDING_TIME = "1 week";
-    private static String NORMAL_LENDING_TIME = "4 week";
+    private static int SHORT_LENDING_TIME = 1;
+    private static int NORMAL_LENDING_TIME = 4;
 
     public static Date StringToDate(String dateStr){
         Date result = null;
@@ -52,7 +52,7 @@ public class BookModel {
     }
 
     public String toString() {
-        return String.format("Name: %s Author: %s Quantity: %d Lending time: %s Location: %s",
+        return String.format("Name: %s Author: %s Quantity: %d Lending time: %d week(s) Location: %s",
                 getName(), getAuthor(), getQuantityAvailable(), getLendingTime(), getLocation());
     }
 
@@ -110,11 +110,18 @@ public class BookModel {
         return date;
     }
 
-    public boolean IsBookNew() {
-        return (getPublished().before(getDate3MonthsBefore()));
+    public Date getDeadlineDate() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_YEAR, getLendingTime() * 7);
+        Date date = cal.getTime();
+        return date;
     }
 
-    public String getLendingTime() {
+    public boolean IsBookNew() {
+        return (getPublished().after(getDate3MonthsBefore()));
+    }
+
+    public int getLendingTime() {
         if(getLendingPeriod() == BookLendingDeadline.SHORT) {
             return SHORT_LENDING_TIME;
         }
