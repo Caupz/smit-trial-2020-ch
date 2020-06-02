@@ -2,10 +2,7 @@ package com.smittrial.demo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.smittrial.demo.models.*;
-import com.smittrial.demo.service.BookServiceImpl;
-import com.smittrial.demo.service.BookLendingsServiceImpl;
-import com.smittrial.demo.service.LogServiceImpl;
-import com.smittrial.demo.service.UserServiceImpl;
+import com.smittrial.demo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,17 +35,24 @@ public class SmitTrialApplication {
 	@Autowired
 	private BookLendingsServiceImpl bookLendingServiceImpl;
 	@Autowired
+	private RoleServiceImpl roleServiceImpl;
+	@Autowired
 	private LogServiceImpl logServiceImpl;
 
-	public void Log(String method, boolean isStart, int userId) {
-		String startOrEndPrefix = isStart ? "[START]" : "[END]";
-		LogModel log = new LogModel(userId, startOrEndPrefix+method);
+	public void Log(String method, int userId, String reason) {
+		reason = ":"+reason;
+		LogModel log = new LogModel(userId, method+reason);
 		logServiceImpl.add(log);
+	}
+
+	public boolean HasUserRole(UserModel user, String roleName) {
+		List<RoleModel> roles = new ArrayList<>(roleServiceImpl.getUserRoles(user.getId()));
+		return (user.hasRole(roleName, roles));
 	}
 
 	@GetMapping(value="getLibrarySummary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<String>> getLibrarySummary() {
-		Log("getLibrarySummary", true, 0);
+		Log("getLibrarySummary", 0, "Init");
 		List<BookModel> books = new ArrayList<>(bookServiceImpl.getAllBooks());
 		List<String> booksResponse = new ArrayList<String>();
 
@@ -57,28 +61,28 @@ public class SmitTrialApplication {
 			booksResponse.add(book.toString());
 		}
 
-		Log("getLibrarySummary", false, 0);
+		Log("getLibrarySummary", 0, "Success");
 		return new ResponseEntity<List<String>>(booksResponse, HttpStatus.OK);
 	}
 
 	@GetMapping(value="searchBookByName/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> searchBookByName(@PathVariable("name") String name) throws JsonProcessingException {
-		Log("searchBookByName", true, 0);
-		UserModel user = new UserModel(); // TODO get user from somewhere
+		UserModel user = new UserModel(1); // TODO get user from somewhere
+		Log("searchBookByName", user.getId(), "Init");
 
-		if(!user.hasRole("library-worker-tender")) {
-			Log("searchBookByName", false, 0);
+		if(!HasUserRole(user,"library-worker-tender")) {
+			Log("searchBookByName", user.getId(), "Access denied");
 			return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson("Access Denied"), HttpStatus.FORBIDDEN);
 		}
 
 		BookModel book = bookServiceImpl.getBookByNameContaining(name);
 
 		if(book == null) {
-			Log("searchBookByName", false, 0);
+			Log("searchBookByName", user.getId(), "Book not found");
 			return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson("No such book"), HttpStatus.NOT_FOUND);
 		}
 
-		Log("searchBookByName", false, 0);
+		Log("searchBookByName", user.getId(), "Success");
 		return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson(book.toString()), HttpStatus.OK);
 	}
 
@@ -90,50 +94,50 @@ public class SmitTrialApplication {
 			@PathVariable("lastname") String lastname,
 			@PathVariable("ssn") String ssn
 	) throws JsonProcessingException {
-		Log("addUser", true, 0);
-		UserModel user = new UserModel(); // TODO get user from somewhere
+		UserModel user = new UserModel(1); // TODO get user from somewhere
+		Log("addUser", user.getId(), "Init");
 
-		if(!user.hasRole("library-worker-tender")) {
-			Log("addUser", false, 0);
+		if(!HasUserRole(user,"library-worker-tender")) {
+			Log("addUser", user.getId(), "Access denied");
 			return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson("Access Denied"), HttpStatus.FORBIDDEN);
 		}
 
 		UserModel newUser = new UserModel(email, password, firstname, lastname, ssn);
 		newUser.setId(userServiceImpl.add(newUser));
 
-		Log("addUser", false, 0);
+		Log("addUser", user.getId(), "Success");
 		return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson(newUser.toString()), HttpStatus.CREATED);
 	}
 
 	@GetMapping(value="getLateLenders", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<BookOvertimeResult>> getLateLenders() throws JsonProcessingException, SQLException {
-		Log("getLateLenders", true, 0);
-		UserModel user = new UserModel(); // TODO get user from somewhere
+		UserModel user = new UserModel(1); // TODO get user from somewhere
+		Log("getLateLenders", user.getId(), "Init");
 		List<BookOvertimeResult> bookOverTimes = new ArrayList<>();
 
-		if(!user.hasRole("library-worker")) {
-			Log("getLateLenders", false, 0);
+		if(!HasUserRole(user,"library-worker")) {
+			Log("getLateLenders", user.getId(), "Access denied");
 			return new ResponseEntity<List<BookOvertimeResult>>(bookOverTimes, HttpStatus.FORBIDDEN);
 		}
 
 		bookOverTimes = new ArrayList<>(bookLendingServiceImpl.getAllLateBookLenders());
-		Log("getLateLenders", false, 0);
+		Log("getLateLenders", user.getId(), "Success");
 		return new ResponseEntity<List<BookOvertimeResult>>(bookOverTimes, HttpStatus.OK);
 	}
 
 	@GetMapping(value="searchBookLender/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<SearchedBookLender>> searchBookLender(@PathVariable("name") String name) throws JsonProcessingException, SQLException {
-		Log("searchBookLender", true, 0);
-		UserModel user = new UserModel(); // TODO get user from somewhere
+		UserModel user = new UserModel(1); // TODO get user from somewhere
+		Log("searchBookLender", user.getId(), "Init");
 		List<SearchedBookLender> bookLenders = new ArrayList<>();
 
-		if(!user.hasRole("library-worker-tender")) {
-			Log("searchBookLender", false, 0);
+		if(!HasUserRole(user,"library-worker-tender")) {
+			Log("searchBookLender", user.getId(), "Access denied");
 			return new ResponseEntity<List<SearchedBookLender>>(bookLenders, HttpStatus.FORBIDDEN);
 		}
 
 		bookLenders = new ArrayList<SearchedBookLender>(bookLendingServiceImpl.searchBookLender(name));
-		Log("searchBookLender", false, 0);
+		Log("searchBookLender", user.getId(), "Success");
 		return new ResponseEntity<List<SearchedBookLender>>(bookLenders, HttpStatus.OK);
 	}
 
@@ -142,11 +146,11 @@ public class SmitTrialApplication {
 			@PathVariable("bookId") int bookId,
 			@PathVariable("userId") int userId
 	) throws JsonProcessingException, SQLException {
-		Log("receiveBook", true, 0);
-		UserModel user = new UserModel(); // TODO get user from somewhere
+		UserModel user = new UserModel(1); // TODO get user from somewhere
+		Log("receiveBook", user.getId(), "Init");
 
-		if(!user.hasRole("library-worker-tender")) {
-			Log("receiveBook", false, 0);
+		if(!HasUserRole(user,"library-worker-tender")) {
+			Log("receiveBook", user.getId(), "Access denied");
 			return new ResponseEntity<Boolean>(false, HttpStatus.FORBIDDEN);
 		}
 
@@ -154,7 +158,7 @@ public class SmitTrialApplication {
 		bookLender.setReturned(1);
 		bookLendingServiceImpl.update(bookLender);
 
-		Log("receiveBook", false, 0);
+		Log("receiveBook", user.getId(), "Success");
 		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 
@@ -163,18 +167,18 @@ public class SmitTrialApplication {
 			@PathVariable("bookId") int bookId,
 			@PathVariable("userId") int userId
 	) throws JsonProcessingException, SQLException {
-		Log("lendBook", true, 0);
-		UserModel user = new UserModel(); // TODO get user from somewhere
+		UserModel user = new UserModel(1); // TODO get user from somewhere
+		Log("lendBook", user.getId(), "Init");
 
-		if(!user.hasRole("library-worker-tender")) {
-			Log("lendBook", false, 0);
+		if(!HasUserRole(user,"library-worker-tender")) {
+			Log("lendBook", user.getId(), "Access denied");
 			return new ResponseEntity<Boolean>(false, HttpStatus.FORBIDDEN);
 		}
 
 		BookModel book = bookServiceImpl.getBookById(bookId);
 
 		if(book == null) {
-			Log("lendBook", false, 0);
+			Log("lendBook", user.getId(), "Book not found");
 			return new ResponseEntity<Boolean>(false, HttpStatus.NOT_FOUND);
 		}
 
@@ -185,7 +189,7 @@ public class SmitTrialApplication {
 		bookLender.setReturned(0);
 		bookLendingServiceImpl.addBookLender(bookLender);
 
-		Log("lendBook", false, 0);
+		Log("lendBook", 0, "Success");
 		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 }

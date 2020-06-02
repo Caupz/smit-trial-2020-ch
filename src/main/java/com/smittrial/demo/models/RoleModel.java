@@ -1,14 +1,33 @@
 package com.smittrial.demo.models;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name="role")
 public class RoleModel {
+    @Id
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private int id;
     private String name;
-    private List<Integer> allowedActions;
 
-    public RoleModel(String _name, List<Integer> _allowedActions){
+    public RoleModel(){
+    }
+
+    public RoleModel(String _name){
         name = _name;
-        allowedActions = _allowedActions;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String val) {
+        name = val;
     }
 }

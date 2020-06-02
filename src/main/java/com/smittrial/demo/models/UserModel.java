@@ -1,6 +1,7 @@
 package com.smittrial.demo.models;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name="user")
@@ -15,6 +16,9 @@ public class UserModel {
     private String ssn;
 
     public UserModel() {
+    }
+    public UserModel(int _id) {
+        id = _id;
     }
     public UserModel(String _email, String _password, String _firstname, String _lastname, String _ssn) {
         email = _email;
@@ -67,8 +71,13 @@ public class UserModel {
         ssn = val;
     }
 
-    public boolean hasRole(String roleName) {
-        // TODO
-        return true;
+    public boolean hasRole(String roleName, List<RoleModel> roles) {
+        for(RoleModel role : roles) {
+            if(role.getName().equals(roleName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
