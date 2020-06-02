@@ -1,25 +1,40 @@
 package com.smittrial.demo.models;
 
-import javax.persistence.Id;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(name="book_lender")
-public class BookLender {
+public class SearchedBookLender {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private int id;
     private int userId;
     private int bookId;
     private int returned;
+    private String firstname;
+    private String lastname;
+    private String bookname;
     private Date deadline;
+    private int timeOverDeadlineInDays;
 
-    public BookLender() {
+    public SearchedBookLender() {
 
+    }
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public String getBookname() {
+        return bookname;
+    }
+
+    public int getTimeOverDeadlineInDays() {
+        return timeOverDeadlineInDays;
     }
 
     public int getId() {
@@ -58,5 +73,21 @@ public class BookLender {
 
     public void setDeadline(Date val) {
         deadline = val;
+    }
+
+    public void setFirstname(String val) {
+        firstname = val;
+    }
+
+    public void setLastname(String val) {
+        lastname = val;
+    }
+
+    public void setBookname(String val) {
+        bookname = val;
+    }
+
+    public void setTimeOverDeadlineInDays(int val) {
+        timeOverDeadlineInDays = val;
     }
 }

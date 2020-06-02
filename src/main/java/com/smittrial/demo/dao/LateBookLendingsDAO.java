@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface LateBookLendingsDAO extends JpaRepository<BookOvertimeResult, Long> {
 
-    @Query(value = "SELECT bl.id, u.firstname, u.lastname, b.name AS bookname, DATEDIFF(NOW(), bl.deadline) AS time_over_deadline_in_days FROM `user` AS u LEFT JOIN book_lender AS bl ON u.id = bl.user_id LEFT JOIN book AS b ON bl.book_id = b.id WHERE bl.deadline <= NOW()", nativeQuery = true)
+    @Query(value = "SELECT bl.id, u.firstname, u.lastname, b.name AS bookname, DATEDIFF(NOW(), bl.deadline) AS time_over_deadline_in_days FROM `user` AS u LEFT JOIN book_lender AS bl ON u.id = bl.user_id LEFT JOIN book AS b ON bl.book_id = b.id WHERE bl.deadline <= NOW() AND bl.returned = 0", nativeQuery = true)
     List<BookOvertimeResult> getLateBookLenders();
 }

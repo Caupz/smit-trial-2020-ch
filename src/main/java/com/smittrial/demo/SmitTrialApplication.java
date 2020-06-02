@@ -1,10 +1,7 @@
 package com.smittrial.demo;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.smittrial.demo.models.BookLender;
-import com.smittrial.demo.models.BookModel;
-import com.smittrial.demo.models.BookOvertimeResult;
-import com.smittrial.demo.models.UserModel;
+import com.smittrial.demo.models.*;
 import com.smittrial.demo.service.BookServiceImpl;
 import com.smittrial.demo.service.BookLendingsServiceImpl;
 import com.smittrial.demo.service.UserServiceImpl;
@@ -32,7 +29,7 @@ public class SmitTrialApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(SmitTrialApplication.class, args);
 	}
-	
+
 	@Autowired
 	private BookServiceImpl bookServiceImpl;
 	@Autowired
@@ -89,23 +86,42 @@ public class SmitTrialApplication {
 	@GetMapping(value="getLateLenders", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<BookOvertimeResult>> getLateLenders() throws JsonProcessingException, SQLException {
 		UserModel user = new UserModel(); // TODO get user from somewhere
-		List<BookOvertimeResult> bookOverTimes = new ArrayList<>(bookLendingServiceImpl.getAllLateBookLenders());
+		List<BookOvertimeResult> bookOverTimes = new ArrayList<>();
 
 		if(!user.hasRole("library-worker")) {
 			return new ResponseEntity<List<BookOvertimeResult>>(bookOverTimes, HttpStatus.FORBIDDEN);
 		}
 
+		bookOverTimes = new ArrayList<>(bookLendingServiceImpl.getAllLateBookLenders());
 		return new ResponseEntity<List<BookOvertimeResult>>(bookOverTimes, HttpStatus.OK);
 	}
 	@GetMapping(value="searchBookLender/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<BookLender>> searchBookLender(@PathVariable("name") String name) throws JsonProcessingException, SQLException {
+	public ResponseEntity<List<SearchedBookLender>> searchBookLender(@PathVariable("name") String name) throws JsonProcessingException, SQLException {
 		UserModel user = new UserModel(); // TODO get user from somewhere
-		List<BookLender> bookLenders = new ArrayList<>(bookLendingServiceImpl.searchBookLender(name));
+		List<SearchedBookLender> bookLenders = new ArrayList<>();
 
-		if(!user.hasRole("library-worker")) {
-			return new ResponseEntity<List<BookLender>>(bookLenders, HttpStatus.FORBIDDEN);
+		if(!user.hasRole("library-worker-tender")) {
+			return new ResponseEntity<List<SearchedBookLender>>(bookLenders, HttpStatus.FORBIDDEN);
 		}
 
-		return new ResponseEntity<List<BookLender>>(bookLenders, HttpStatus.OK);
+		bookLenders = new ArrayList<SearchedBookLender>(bookLendingServiceImpl.searchBookLender(name));
+		return new ResponseEntity<List<SearchedBookLender>>(bookLenders, HttpStatus.OK);
+	}
+	@GetMapping(value="receiveBook/{bookId}/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> receiveBook(
+			@PathVariable("bookId") int bookId,
+			@PathVariable("userId") int userId
+	) throws JsonProcessingException, SQLException {
+		UserModel user = new UserModel(); // TODO get user from somewhere
+
+		if(!user.hasRole("library-worker-tender")) {
+			return new ResponseEntity<Boolean>(false, HttpStatus.FORBIDDEN);
+		}
+
+		BookLender bookLender = bookLendingServiceImpl.findByBookAndUserId(bookId, userId);
+		bookLender.setReturned(1);
+		bookLendingServiceImpl.update(bookLender);
+
+		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 }
