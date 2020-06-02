@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.smittrial.demo.models.BookModel;
 import com.smittrial.demo.models.UserModel;
 import com.smittrial.demo.service.BookServiceImpl;
+import com.smittrial.demo.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,6 +31,8 @@ public class SmitTrialApplication {
 
 	@Autowired
 	private BookServiceImpl bookServiceImpl;
+	@Autowired
+	private UserServiceImpl userServiceImpl;
 
 	@GetMapping(value="getLibrarySummary", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<String>> getLibrarySummary() {
@@ -44,7 +47,7 @@ public class SmitTrialApplication {
 	}
 	@GetMapping(value="searchBookByName/{name}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> searchBookByName(@PathVariable("name") String name) throws JsonProcessingException {
-		UserModel user = new UserModel(1); // TODO get user from somewhere
+		UserModel user = new UserModel(); // TODO get user from somewhere
 
 		if(!user.hasRole("library-worker-tender")) {
 			return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson("Access Denied"), HttpStatus.FORBIDDEN);
@@ -57,5 +60,24 @@ public class SmitTrialApplication {
 		}
 
 		return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson(book.toString()), HttpStatus.OK);
+	}
+	@GetMapping(value="addUser/{email}/{password}/{firstname}/{lastname}/{ssn}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<String> addUser(
+			@PathVariable("email") String email,
+			@PathVariable("password") String password,
+			@PathVariable("firstname") String firstname,
+			@PathVariable("lastname") String lastname,
+			@PathVariable("ssn") String ssn
+	) throws JsonProcessingException {
+		UserModel user = new UserModel(); // TODO get user from somewhere
+
+		if(!user.hasRole("library-worker-tender")) {
+			return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson("Access Denied"), HttpStatus.FORBIDDEN);
+		}
+
+		UserModel newUser = new UserModel(email, password, firstname, lastname, ssn);
+		newUser.setId(userServiceImpl.add(newUser));
+
+		return new ResponseEntity<String>(JSONUtils.covertFromObjectToJson(newUser.toString()), HttpStatus.CREATED);
 	}
 }
